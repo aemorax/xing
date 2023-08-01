@@ -1,0 +1,10 @@
+{
+	"name": "xing",
+	"url": "https://github.com/nevergarden/xing",
+	"license": "MIT",
+	"contributors": ["nevergarden"],
+	"description": "Hashlink Web Framework",
+	"version": "1.0.0",
+	"releasenote": "",
+	"dependencies": {"hlpicohttp": "1.0.0"}
+}
