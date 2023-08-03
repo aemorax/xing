@@ -4,20 +4,19 @@ abstract Token(TokenType) from TokenType {
 	public static final keywords : Map<Int, Map<String, TokenCode>> = [
 		2 => [
 			"if"=>Tif,
-			"in"=>Tin
+			"in"=>Tin,
 		],
 		3 => [
 			"for"=>Tfor,
-			"end"=>Tend
 		],
 		4 => [
 			"elif"=>Telif,
 			"else"=>Telse,
-			"true"=>Ttrue
+			"true"=>Ttrue,
 		],
 		5 => [
 			"while"=>Twhile,
-			"false"=>Tfalse
+			"false"=>Tfalse,
 		]
 	];
 
@@ -25,7 +24,6 @@ abstract Token(TokenType) from TokenType {
 		Tif => 2,
 		Tin => 2,
 		Tfor => 3,
-		Tend => 3,
 		Telif => 4,
 		Telse => 4,
 		Ttrue => 4,
@@ -35,7 +33,6 @@ abstract Token(TokenType) from TokenType {
 
 	public function new(code:TokenCode, ?start:Int=0, ?length:Int=0, ?literal:String) {
 		length = findLength(code, length, literal);
-		literal = code > StartKeyword ? null : literal;
 
 		this = {
 			code: code,
@@ -91,6 +88,6 @@ abstract Token(TokenType) from TokenType {
 
 	@:keep
 	public function toString():String {
-		return Std.string(this.code)+":"+this.literal;
+		return '${Std.string(this.code)}${this.literal == "" ? "" : ":" + this.literal}';
 	}
 }

@@ -40,7 +40,7 @@ class Lexer {
 				this.tokens.push(token);
 			}
 		}
-		tokens.push(new Token(TEOF, start, 0));
+		tokens.push(new Token(TEOF, current, 0, "eof"));
 		return tokens;
 	}
 
@@ -53,7 +53,7 @@ class Lexer {
 					if (c == "{") {
 						if (match("{")) {
 							this.context = Control;
-							return newToken(TDoc, this.length);
+							return newToken(TDoc, this.length-2);
 						}
 					}
 					c = advance();
@@ -67,6 +67,7 @@ class Lexer {
 					case "}":
 						if (match("}")) {
 							this.context = Document;
+							this.length=0;
 							return null;
 						} else {
 							return newToken(TRBrac);
@@ -176,8 +177,9 @@ class Lexer {
 		}
 	}
 
-	private inline function newToken(token:TokenCode, ?length:Int = 0):Token {
-		var tok = new Token(token, start, length, this.source.substr(start, length));
+	private inline function newToken(token:TokenCode, ?length:Int = 0, ?literal:String = ""):Token {
+		literal = literal == "" ? this.source.substr(start, length) : literal;
+		var tok = new Token(token, start, length, literal);
 		this.length = 0;
 		return tok;
 	}
@@ -248,13 +250,14 @@ class Lexer {
 				advance();
 			}
 		} else {
-			return newToken(TInt, length);
+			return newToken(TInt, length-1);
 		}
 
-		return newToken(TFloat, length);
+		return newToken(TFloat, length-1);
 	}
 
 	private inline function string(term:String):Token {
+		length = 1;
 		while (peek(0) != term && !eof() && peek(-1) != "\\") {
 			if (peek(0) == "\n")
 				lineOperations();
@@ -283,7 +286,7 @@ class Lexer {
 		if(t1 != null) {
 			var t2 = t1.get(value);
 			if(t2 != null) {
-				return newToken(t2);
+				return newToken(t2, 0, value);
 			}
 		}
 		return newToken(TID, length);

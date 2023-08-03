@@ -64,7 +64,6 @@ enum abstract TokenCode(Int) from Int to Int {
 	var Twhile;        // while
 	var Tfor;          // for
 	var Tin;           // in
-	var Tend;          // end
 	var Ttrue;         // true
 	var Tfalse;        // false
 	var EndKeyword;    // End of keywords

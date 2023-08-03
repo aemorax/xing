@@ -6,11 +6,13 @@
 	<title>{{ document_name }}</title>
 </head>
 <body>
-	<li>{{
-		i = 0; 
+	{{
+		i = 0;
 		while(i < 10) {
-			i++;
-		}
-	}}</li>
+			if(i%2) {
+				"<li>" i "</li>"
+			}
+		};
+	}}
 </body>
 </html>
