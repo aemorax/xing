@@ -1,4 +1,5 @@
 --library ansi
+--library hashlink
 --library hlpicohttp
 --library tink_core
 --library tink_macro
@@ -16,4 +17,4 @@
 --each
 
 --next
---hl out/tests.hl
+--hl out/tests.c

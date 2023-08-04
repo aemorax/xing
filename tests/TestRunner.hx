@@ -8,7 +8,8 @@ class TestRunner {
 	public static function main() {
 		var starter = TestBatch.make([
 			new BasicTest(),
-			new template.LexTest(),
+			// new template.LexTest(),
+			new template.ParseTest(),
 		]);
 
 		// Run Testing Batch And Exit

@@ -26,6 +26,7 @@ enum abstract TokenCode(Int) from Int to Int {
 	var TQuote;        // ' 
 	var TDQuote;       // " 
 	var TCaret;        // ^ 
+	var TExclam;       // ! 
 	var EndSingle;     // End of single character tokens
 	// Double Tokens
 	var StartDouble;   // Double Tokens

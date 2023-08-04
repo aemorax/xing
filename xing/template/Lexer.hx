@@ -152,6 +152,8 @@ class Lexer {
 						return newToken(TTilde);
 					case "^":
 						return newToken(TCaret);
+					case "!":
+						return newToken(TExclam);
 					case ":":
 						if(match("=")) {
 							return newToken(TColonEqual);
@@ -229,6 +231,7 @@ class Lexer {
 	}
 
 	private function number():Token {
+		length = 1;
 		if (peek(-1) == "0") {
 			var next:String = peek();
 			switch (next) {
@@ -250,10 +253,10 @@ class Lexer {
 				advance();
 			}
 		} else {
-			return newToken(TInt, length-1);
+			return newToken(TInt, length);
 		}
 
-		return newToken(TFloat, length-1);
+		return newToken(TFloat, length);
 	}
 
 	private inline function string(term:String):Token {
