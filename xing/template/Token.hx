@@ -1,26 +1,14 @@
 package xing.template;
 
 abstract Token(TokenType) from TokenType {
-	public static final keywords : Map<Int, Map<String, TokenCode>> = [
-		2 => [
-			"if"=>Tif,
-			"in"=>Tin,
-		],
-		3 => [
-			"for"=>Tfor,
-		],
-		4 => [
-			"elif"=>Telif,
-			"else"=>Telse,
-			"true"=>Ttrue,
-		],
-		5 => [
-			"while"=>Twhile,
-			"false"=>Tfalse,
-		]
+	public static final keywords:Map<Int, Map<String, TokenCode>> = [
+		2 => ["if" => Tif, "in" => Tin,],
+		3 => ["for" => Tfor,],
+		4 => ["elif" => Telif, "else" => Telse, "true" => Ttrue,],
+		5 => ["while" => Twhile, "false" => Tfalse,]
 	];
 
-	static final keywordLength : Map<TokenCode,Int> = [
+	static final keywordLength:Map<TokenCode, Int> = [
 		Tif => 2,
 		Tin => 2,
 		Tfor => 3,
@@ -31,7 +19,7 @@ abstract Token(TokenType) from TokenType {
 		Twhile => 5,
 	];
 
-	public function new(code:TokenCode, ?start:Int=0, ?length:Int=0, ?literal:String) {
+	public function new(code:TokenCode, ?start:Int = 0, ?length:Int = 0, ?literal:String) {
 		length = findLength(code, length, literal);
 
 		this = {
@@ -42,10 +30,10 @@ abstract Token(TokenType) from TokenType {
 		};
 	}
 
-	public var code(get,never):TokenCode;
-	public var start(get,never):Int;
-	public var length(get,never):Int;
-	public var literal(get,never):String;
+	public var code(get, never):TokenCode;
+	public var start(get, never):Int;
+	public var length(get, never):Int;
+	public var literal(get, never):String;
 
 	inline function get_code():TokenCode {
 		return this.code;
@@ -63,22 +51,22 @@ abstract Token(TokenType) from TokenType {
 		return this.literal;
 	}
 
-	inline function findLength(code:TokenCode, ?length:Int=0, ?literal:String) : Int {
-		if(length == 0) {
-			if(code < EndSingle) {
+	inline function findLength(code:TokenCode, ?length:Int = 0, ?literal:String):Int {
+		if (length == 0) {
+			if (code < EndSingle) {
 				length = 1;
-			} else if(code < EndDouble) {
+			} else if (code < EndDouble) {
 				length = 2;
-			} else if(code < EndLiteral) {
-				if(literal != null) {
+			} else if (code < EndLiteral) {
+				if (literal != null) {
 					length = literal.length;
 				}
 			}
 		}
 
-		if(code > StartKeyword) {
+		if (code > StartKeyword) {
 			var kw = keywordLength.get(code);
-			if(kw != null) {
+			if (kw != null) {
 				length = kw;
 			}
 		}

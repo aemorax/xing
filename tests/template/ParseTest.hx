@@ -5,12 +5,10 @@ import tink.unit.Assert;
 import xing.template.Lexer;
 
 class ParseTest {
-	public function new() {
-		
-	}
-	
+	public function new() {}
+
 	public function testKeywords() {
-		var template = "{{ ~12; }}";
+		var template = "{{ a = 12 + 13; }}";
 		var lexer = new Lexer(template, "base.html");
 		var tokens = lexer.scanTokens();
 		var parser = new Parser(tokens);

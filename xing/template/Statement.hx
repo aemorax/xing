@@ -5,7 +5,8 @@ interface Statement {
 }
 
 class ExpressionStatement implements Statement {
-	private final expression : Expression;
+	private final expression:Expression;
+
 	public function new(expression:Expression) {
 		this.expression = expression;
 	}
@@ -16,9 +17,7 @@ class ExpressionStatement implements Statement {
 }
 
 class VariableStatement implements Statement {
-	public function new(name:Token, initializer:Expression) {
-		
-	}
+	public function new(name:Token, initializer:Expression) {}
 
 	public function toString():String {
 		return "Variable";
@@ -27,6 +26,7 @@ class VariableStatement implements Statement {
 
 class BlockStatement implements Statement {
 	private final statements:Array<Statement>;
+
 	public function new(statements:Array<Statement>) {
 		this.statements = statements;
 	}
@@ -36,19 +36,17 @@ class BlockStatement implements Statement {
 	}
 
 	public function toString():String {
-		var s : String = "{\n";
-		for(statement in statements) {
+		var s:String = "{\n";
+		for (statement in statements) {
 			s += "\t" + statement.toString() + "\n";
 		}
-		s+="}";
+		s += "}";
 		return s;
 	}
 }
 
 class IfStatement implements Statement {
-	public function new(condition:Expression, thenBlock:Statement, elseBlock:Statement) {
-		
-	}
+	public function new(condition:Expression, thenBlock:Statement, elseBlock:Statement) {}
 
 	public function toString():String {
 		return "If";
@@ -56,9 +54,7 @@ class IfStatement implements Statement {
 }
 
 class WhileStatement implements Statement {
-	public function new(condition:Expression, body:Statement) {
-		
-	}
+	public function new(condition:Expression, body:Statement) {}
 
 	public function toString():String {
 		return "While";
@@ -66,9 +62,7 @@ class WhileStatement implements Statement {
 }
 
 class ForStatement implements Statement {
-	public function new(condition:Expression, body:Statement) {
-		
-	}
+	public function new(condition:Expression, body:Statement) {}
 
 	public function toString():String {
 		return "For";

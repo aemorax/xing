@@ -24,4 +24,3 @@ class BasicTest {
 		return Assert.assert(true, "Test System Working.");
 	}
 }
-

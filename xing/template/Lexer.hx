@@ -53,7 +53,7 @@ class Lexer {
 					if (c == "{") {
 						if (match("{")) {
 							this.context = Control;
-							return newToken(TDoc, this.length-2);
+							return newToken(TDoc, this.length - 2);
 						}
 					}
 					c = advance();
@@ -67,7 +67,7 @@ class Lexer {
 					case "}":
 						if (match("}")) {
 							this.context = Document;
-							this.length=0;
+							this.length = 0;
 							return null;
 						} else {
 							return newToken(TRBrac);
@@ -153,9 +153,12 @@ class Lexer {
 					case "^":
 						return newToken(TCaret);
 					case "!":
+						if (match("=")) {
+							return newToken(TNEqual);
+						}
 						return newToken(TExclam);
 					case ":":
-						if(match("=")) {
+						if (match("=")) {
 							return newToken(TColonEqual);
 						}
 						throw new LexerException(": must be followed with =", current, fileName);
@@ -168,9 +171,9 @@ class Lexer {
 					case "\n":
 						lineOperations();
 					default:
-						if(LexerUtil.isDigit(c)) {
+						if (LexerUtil.isDigit(c)) {
 							return number();
-						} else if(LexerUtil.isAlpha(c)) {
+						} else if (LexerUtil.isAlpha(c)) {
 							return identifier();
 						}
 						throw new LexerException('Invalid character $c', current, fileName);
@@ -277,18 +280,18 @@ class Lexer {
 	}
 
 	private function identifier():Token {
-		while(LexerUtil.isIdentifierChar(peek())) {
+		while (LexerUtil.isIdentifierChar(peek())) {
 			advance();
 		}
 
 		var value = source.substring(start, current);
 		length = value.length;
-		
+
 		// Keyword check
 		var t1 = Token.keywords.get(length);
-		if(t1 != null) {
+		if (t1 != null) {
 			var t2 = t1.get(value);
-			if(t2 != null) {
+			if (t2 != null) {
 				return newToken(t2, 0, value);
 			}
 		}
