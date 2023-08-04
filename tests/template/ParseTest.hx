@@ -10,7 +10,7 @@ class ParseTest {
 	}
 	
 	public function testKeywords() {
-		var template = "{{ [12 , 13, 14]; }}";
+		var template = "{{ ~12; }}";
 		var lexer = new Lexer(template, "base.html");
 		var tokens = lexer.scanTokens();
 		var parser = new Parser(tokens);

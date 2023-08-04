@@ -1,5 +1,6 @@
 package xing.template;
 
+import xing.template.Expression.UnaryPrefixExpression;
 import xing.template.Expression.LiteralExpression;
 import xing.template.Statement.DocStatement;
 import xing.template.Statement.ForStatement;
@@ -125,29 +126,30 @@ class Parser {
 	}
 
 	private inline function prefix_unary_expression():Expression {
+		if(matchOneOf([TMinusMinus, TPlusPlus, TTilde, TExclam, TMinus])) {
+			return new UnaryPrefixExpression(advance(), primary(true));
+		}
 		return primary();
 	}
 
-	private inline function primary():Expression {
+	private inline function primary(?hasPrefix:Bool=false, ?hasPostfix:Bool=false):Expression {
 		if(match(Tfalse)) {
 			advance();
-			return new LiteralExpression(false, XBoolean);
+			return new LiteralExpression(false, XBoolean, hasPrefix ? peek(-2).code : -1);
 		}
 		if(match(Ttrue)) {
 			advance();
-			return new LiteralExpression(true, XBoolean);
+			return new LiteralExpression(true, XBoolean, hasPrefix ? peek(-2).code : -1);
 		}
+
 		if(match(TString)) {
-			advance();
-			return new LiteralExpression(peek(-1).literal, XString);
+			return new LiteralExpression(advance().literal, XString, hasPrefix ? peek(-2).code : -1);
 		}
 		if(match(TInt)) {
-			advance();
-			return new LiteralExpression(Std.parseInt(peek(-1).literal), XInt);
+			return new LiteralExpression(Std.parseInt(advance().literal), XInt, hasPrefix ? peek(-2).code : -1);
 		}
 		if(match(TFloat)) {
-			advance();
-			return new LiteralExpression(Std.parseFloat(peek(-1).literal), XFloat);
+			return new LiteralExpression(Std.parseFloat(advance().literal), XFloat, hasPrefix ? peek(-2).code : -1);
 		}
 		if(match(TLBrak)) {
 			advance();
