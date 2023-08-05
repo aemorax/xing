@@ -85,6 +85,9 @@ class Lexer {
 					case ";":
 						return newToken(TSemiColon);
 					case ".":
+						if (match(".")) {
+							return newToken(TInterval);
+						}
 						return newToken(TStop);
 					case "+":
 						if (match("+")) {

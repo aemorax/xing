@@ -1,7 +1,6 @@
 package xing.template;
 
 enum abstract ExpressionKind(Int) from Int to Int {
-	var EDummy;
 	var EPrefixUnary;
 	var EPostfixUnary;
 	var EBinary;
@@ -11,5 +10,6 @@ enum abstract ExpressionKind(Int) from Int to Int {
 	var EAssignment;
 	var EPassAssignment;
 	var ECompAssignment;
-	var EArray;
+	var EIterator;
+	var EForCondition;
 }

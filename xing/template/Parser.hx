@@ -1,6 +1,8 @@
 package xing.template;
 
-import haxe.Exception;
+import xing.template.Expression.ForConditionExpression;
+import xing.template.Expression.IteratorExpression;
+import xing.template.Expression.GroupExpression;
 import xing.template.Expression.VariableExpression;
 import xing.template.Expression.AssignmentExpression;
 import xing.template.Expression.BinaryExpression;
@@ -119,8 +121,33 @@ class Parser {
 		return assignment();
 	}
 
-	private inline function forExpression():Expression {
-		return null;
+	private function forExpression():Expression {
+		var left = expression();
+
+		if (match(TSemiColon)) {
+			advance();
+			var cond = expression();
+			var right:Expression;
+			try {
+				consume(TSemiColon, "Expected ';' after condition for initializer");
+				right = expression();
+			} catch (e:ParserException) {
+				right = null;
+			}
+			return new ForConditionExpression(left, cond, right);
+		}
+
+		if (match(Tin)) {
+			if (left.kind == EVariable) {
+				var token = left.name;
+				advance();
+				var exp = expression();
+				return new IteratorExpression(token, exp);
+			}
+			throw new ParserException('Invalid iterator initializer, expected ${ExpressionKind.EVariable} got: ${left.kind}');
+		}
+
+		return left;
 	}
 
 	private inline function assignment():Expression {
@@ -131,7 +158,7 @@ class Parser {
 			if (expr.kind != EVariable) {
 				throw new ParserException("Can't assign to a non variable.");
 			}
-			return new AssignmentExpression(expr.name, value, op.code);
+			return new AssignmentExpression(expr.name, value, op);
 		}
 		return expr;
 	}
@@ -179,12 +206,39 @@ class Parser {
 		return binary_expression(BinaryExpression.compareOps, bitwise, bitwise);
 	}
 
+	private inline function interval():Expression {
+		return binary_expression(BinaryExpression.intervalOps, comparison, comparison);
+	}
+
 	private inline function and():Expression {
-		return binary_expression(BinaryExpression.logicalAndOp, comparison, comparison);
+		return binary_expression(BinaryExpression.logicalAndOp, interval, interval);
 	}
 
 	private inline function or():Expression {
 		return binary_expression(BinaryExpression.logicalOrOp, and, and);
+	}
+
+	private inline function array():Expression {
+		var array:Array<Expression> = [];
+
+		if (!match(TRBrak)) {
+			do {
+				if (peek().code == TComma)
+					advance();
+
+				array.push(expression());
+			} while (match(TComma));
+		}
+
+		consume(TRBrak, "Unterminated array.");
+		return new LiteralExpression(array, XArray);
+	}
+
+	private inline function group():Expression {
+		consume(TLPran, "Expected '(' for group expression.");
+		var expr = expression();
+		consume(TRPran, "Expected ')' after group.");
+		return new GroupExpression(expr);
 	}
 
 	private inline function primary(?hasPrefix:Bool = false, ?hasPostfix:Bool = false):Expression {
@@ -208,7 +262,10 @@ class Parser {
 		}
 		if (match(TLBrak)) {
 			advance();
-			return primary_array();
+			return array();
+		}
+		if (match(TLPran)) {
+			return group();
 		}
 
 		if (match(TID)) {
@@ -216,22 +273,6 @@ class Parser {
 		}
 
 		throw new ParserException("Unknown value as primary.");
-	}
-
-	private inline function primary_array():Expression {
-		var array:Array<Expression> = [];
-
-		if (!match(TRBrak)) {
-			do {
-				if (peek().code == TComma)
-					advance();
-
-				array.push(expression());
-			} while (match(TComma));
-		}
-
-		consume(TRBrak, "Unterminated array.");
-		return new LiteralExpression(array, XArray);
 	}
 
 	private inline function consume(code:TokenCode, exception:String) {

@@ -50,6 +50,7 @@ enum abstract TokenCode(Int) from Int to Int {
 	var TCommentStart; // "#{"
 	var TCommentEnd; // "}#"
 	var TColonEqual; // :=
+	var TInterval; // ..
 	var EndDouble; // End of double character Tokens
 	var StartLiteral; // StartLiteral
 	var TDoc; // Anything in document context
