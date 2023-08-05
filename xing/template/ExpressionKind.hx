@@ -10,5 +10,6 @@ enum abstract ExpressionKind(Int) from Int to Int {
 	var EVariable;
 	var EAssignment;
 	var EPassAssignment;
+	var ECompAssignment;
 	var EArray;
 }

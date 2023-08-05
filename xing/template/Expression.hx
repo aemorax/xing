@@ -98,13 +98,17 @@ abstract BinaryExpression(ExpressionType) to Expression {
 }
 
 abstract AssignmentExpression(ExpressionType) to Expression {
-	public static final assignmentOps:Array<TokenCode> = [TEqual, TColonEqual];
+	public static final assignmentOps:Array<TokenCode> = [
+		TEqual, TColonEqual,
+		TPlusEqual, TMinusEqual, TAsteriskEqual, TSlashEqual, TPrcentEqual,
+	];
 
 	public function new(name:Token, value:Expression, op:TokenCode) {
 		this = {
 			kind: switch (op) {
 				case TEqual: EAssignment;
 				case TColonEqual: EPassAssignment;
+				case TPlusEqual, TMinusEqual, TAsteriskEqual, TSlashEqual, TPrcentEqual: ECompAssignment;
 				default: throw new ParserException("Invalid assignment operator.");
 			},
 			name: name,
