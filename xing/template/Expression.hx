@@ -1,8 +1,8 @@
 package xing.template;
 
 import xing.exception.template.ParserException;
-import xing.template.ExpressionType;
 import xing.template.ExpressionType.XingTemplateType;
+import xing.template.ExpressionType;
 
 abstract Expression(ExpressionType) from ExpressionType to ExpressionType {
 	public function new(exp:ExpressionType) {
@@ -22,29 +22,37 @@ abstract Expression(ExpressionType) from ExpressionType to ExpressionType {
 
 	public function toString():String {
 		switch (this.kind) {
-			case EGroup: return '(group (${this.e}))';
-			case EAssignment: return '(${this.name} = (${this.e}))';
-			case EPassAssignment: return '(${this.name} := (${this.e}))';
-			case ECompAssignment: return '(${this.name} (comp:${this.op.code})= (${this.e}))';
-			case EPrefixUnary: return '(unary:${this.op} ${this.e})';
-			case EPostfixUnary: return '(${this.e} unary:${this.op})';
-			case EVariable: return '(var ${this.name})';
-			case EBinary: return '(binary (${this.l} (binop:${this.op.code}) ${this.r}))';
-			case ELiteral: return '(${this.kind}:literal:${this.type} (${this.value}))';
-			case EIterator: return '(${this.name} in ${this.e})';
-			case EForCondition: return '(${this.l};${this.e};${this.r})';
-			default: return Std.string(this);
+			case EGroup:
+				return '(group (${this.e}))';
+			case EAssignment:
+				return '(${this.name} = (${this.e}))';
+			case EPassAssignment:
+				return '(${this.name} := (${this.e}))';
+			case ECompAssignment:
+				return '(${this.name} (comp:${this.op.code})= (${this.e}))';
+			case EPrefixUnary:
+				return '(unary:${this.op} ${this.e})';
+			case EPostfixUnary:
+				return '(${this.e} unary:${this.op})';
+			case EVariable:
+				return '(var ${this.name})';
+			case EBinary:
+				return '(binary (${this.l} (binop:${this.op.code}) ${this.r}))';
+			case ELiteral:
+				return '(${this.kind}:literal:${this.type} (${this.value}))';
+			case EIterator:
+				return '(${this.name} in ${this.e})';
+			case EForCondition:
+				return '(${this.l};${this.e};${this.r})';
+			default:
+				return Std.string(this);
 		}
 		return Std.string(this);
 	}
 }
 
 abstract LiteralExpression(ExpressionType) to Expression {
-	public function new(value:Dynamic, type:XingTemplateType, ?uprefix:TokenCode = -1, ?upostfix:TokenCode = -1) {
-		if (uprefix != -1) {
-			if (!UnaryPrefixExpression.supportedOperations.get(type).contains(uprefix))
-				throw new ParserException('Can not parse prefix ${uprefix} for type ${type}.');
-		}
+	public function new(value:Dynamic, type:XingTemplateType) {
 		this = {
 			kind: ELiteral,
 			value: value,
@@ -82,6 +90,15 @@ abstract UnaryPrefixExpression(ExpressionType) to Expression {
 }
 
 abstract UnaryPostExpression(ExpressionType) to Expression {
+	public static final ops:Array<TokenCode> = [TPlusPlus, TMinusMinus];
+	public static final supportedOperations:Map<XingTemplateType, Array<TokenCode>> = [
+		XBoolean => [],
+		XInt => [TPlusPlus, TMinusMinus],
+		XFloat => [TPlusPlus, TMinusMinus],
+		XString => [],
+		XArray => []
+	];
+
 	public function new(opr:Token, expression:Expression) {
 		this = {
 			kind: EPostfixUnary,
@@ -123,8 +140,15 @@ abstract GroupExpression(ExpressionType) to Expression {
 
 abstract AssignmentExpression(ExpressionType) to Expression {
 	public static final assignmentOps:Array<TokenCode> = [
-		TEqual, TColonEqual,
-		TPlusEqual, TMinusEqual, TAsteriskEqual, TSlashEqual, TPrcentEqual,
+		TEqual,
+		TColonEqual,
+		TPlusEqual,
+		TMinusEqual,
+		TAsteriskEqual,
+		TSlashEqual,
+		TPrcentEqual,
+		TAmpEqual,
+		TPipeEqual
 	];
 
 	public function new(name:Token, value:Expression, op:Token) {
@@ -132,7 +156,7 @@ abstract AssignmentExpression(ExpressionType) to Expression {
 			kind: switch (op.code) {
 				case TEqual: EAssignment;
 				case TColonEqual: EPassAssignment;
-				case TPlusEqual, TMinusEqual, TAsteriskEqual, TSlashEqual, TPrcentEqual: ECompAssignment;
+				case TPlusEqual, TMinusEqual, TAsteriskEqual, TSlashEqual, TPrcentEqual, TAmpEqual, TPipeEqual: ECompAssignment;
 				default: throw new ParserException("Invalid assignment operator.");
 			},
 			name: name,

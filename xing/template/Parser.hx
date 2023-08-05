@@ -1,20 +1,21 @@
 package xing.template;
 
-import xing.template.Expression.ForConditionExpression;
-import xing.template.Expression.IteratorExpression;
-import xing.template.Expression.GroupExpression;
-import xing.template.Expression.VariableExpression;
+import xing.exception.template.ParserException;
 import xing.template.Expression.AssignmentExpression;
 import xing.template.Expression.BinaryExpression;
-import xing.template.Expression.UnaryPrefixExpression;
+import xing.template.Expression.ForConditionExpression;
+import xing.template.Expression.GroupExpression;
+import xing.template.Expression.IteratorExpression;
 import xing.template.Expression.LiteralExpression;
-import xing.template.Statement.DocStatement;
-import xing.template.Statement.ForStatement;
-import xing.template.Statement.WhileStatement;
-import xing.template.Statement.ExpressionStatement;
-import xing.exception.template.ParserException;
-import xing.template.Statement.IfStatement;
+import xing.template.Expression.UnaryPostExpression;
+import xing.template.Expression.UnaryPrefixExpression;
+import xing.template.Expression.VariableExpression;
 import xing.template.Statement.BlockStatement;
+import xing.template.Statement.DocStatement;
+import xing.template.Statement.ExpressionStatement;
+import xing.template.Statement.ForStatement;
+import xing.template.Statement.IfStatement;
+import xing.template.Statement.WhileStatement;
 
 class Parser {
 	private final tokens:Array<Token>;
@@ -113,8 +114,7 @@ class Parser {
 	}
 
 	private inline function docStatement():DocStatement {
-		advance();
-		return new DocStatement(peek(-1));
+		return new DocStatement(advance());
 	}
 
 	private inline function expression():Expression {
@@ -176,10 +176,18 @@ class Parser {
 	}
 
 	private inline function prefix_unary_expression():Expression {
-		if (matchOneOf([TMinusMinus, TPlusPlus, TTilde, TExclam, TMinus])) {
-			return new UnaryPrefixExpression(advance(), primary(true));
+		if (matchOneOf(UnaryPrefixExpression.ops)) {
+			return new UnaryPrefixExpression(advance(), primary());
 		}
 		return primary();
+	}
+
+	private inline function postfix_unary_expression(exp:Expression):Expression {
+		if(matchOneOf(UnaryPostExpression.ops)) {
+			return new UnaryPostExpression(advance(), exp);
+		}
+
+		return exp;
 	}
 
 	private inline function modulo():Expression {
@@ -241,35 +249,35 @@ class Parser {
 		return new GroupExpression(expr);
 	}
 
-	private inline function primary(?hasPrefix:Bool = false, ?hasPostfix:Bool = false):Expression {
+	private inline function primary():Expression {
 		if (match(Tfalse)) {
 			advance();
-			return new LiteralExpression(false, XBoolean, hasPrefix ? peek(-2).code : -1);
+			return new LiteralExpression(false, XBoolean);
 		}
 		if (match(Ttrue)) {
 			advance();
-			return new LiteralExpression(true, XBoolean, hasPrefix ? peek(-2).code : -1);
+			return new LiteralExpression(true, XBoolean);
 		}
 
 		if (match(TString)) {
-			return new LiteralExpression(advance().literal, XString, hasPrefix ? peek(-2).code : -1);
+			return new LiteralExpression(advance().literal, XString);
 		}
 		if (match(TInt)) {
-			return new LiteralExpression(Std.parseInt(advance().literal), XInt, hasPrefix ? peek(-2).code : -1);
+			return postfix_unary_expression(new LiteralExpression(Std.parseInt(advance().literal), XInt));
 		}
 		if (match(TFloat)) {
-			return new LiteralExpression(Std.parseFloat(advance().literal), XFloat, hasPrefix ? peek(-2).code : -1);
+			return postfix_unary_expression(new LiteralExpression(Std.parseFloat(advance().literal), XFloat));
 		}
 		if (match(TLBrak)) {
 			advance();
 			return array();
 		}
 		if (match(TLPran)) {
-			return group();
+			return postfix_unary_expression(group());
 		}
 
 		if (match(TID)) {
-			return new VariableExpression(advance());
+			return postfix_unary_expression(new VariableExpression(advance()));
 		}
 
 		throw new ParserException("Unknown value as primary.");

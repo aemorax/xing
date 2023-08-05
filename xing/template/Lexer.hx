@@ -121,13 +121,19 @@ class Lexer {
 						}
 						return newToken(TPrcent);
 					case "|":
+						if (match("|")) {
+							return new Token(TDPipe);
+						}
 						if (match("=")) {
-							return newToken(TDPipe);
+							return newToken(TPipeEqual);
 						}
 						return newToken(TPipe);
 					case "&":
+						if (match("&")) {
+							return new Token(TDAmp);
+						}
 						if (match("=")) {
-							return newToken(TDAmp);
+							return newToken(TAmpEqual);
 						}
 						return newToken(TAmp);
 					case "=":

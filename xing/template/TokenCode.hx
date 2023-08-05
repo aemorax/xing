@@ -45,6 +45,8 @@ enum abstract TokenCode(Int) from Int to Int {
 	var TARBrakBrak; // >>
 	var TDAmp; // &&
 	var TDPipe; // ||
+	var TAmpEqual; // &=
+	var TPipeEqual; // |=
 	var TDLBrace; // "{{"
 	var TDRBrace; // "}}"
 	var TCommentStart; // "#{"
