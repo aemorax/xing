@@ -1,5 +1,6 @@
 package xing.template;
 
+import xing.template.Expression.VariableExpression;
 import xing.template.Statement.WhileStatement;
 import xing.template.Expression.BinaryExpression;
 import xing.template.Statement.ExpressionStatement;
@@ -46,7 +47,14 @@ class XingCodeAnalyzer extends BaseAnalyzerDriver {
 		while(queue.length != 0) {
 			codes.push(queue.pop());
 		}
-		codes.push(handleExpression(statement.condition));
+		
+		var condition = handleExpression(statement.condition);
+
+		while(queue.length != 0) {
+			codes.push(queue.pop());
+		}
+
+		codes.push(condition);
 		
 		var jmp : XingCode = {
 			opcode: JMP,
@@ -169,5 +177,14 @@ class XingCodeAnalyzer extends BaseAnalyzerDriver {
 		}
 
 		return ret;
+	}
+
+	override function handleVariableExpression(expression:VariableExpression):XingCode {
+		var code : XingCode = {
+			opcode: LDA,
+			arg1: {Variable: expression.name.literal}
+		};
+
+		return code;
 	}
 }

@@ -87,6 +87,12 @@ abstract LiteralExpression(ExpressionType) to Expression {
 }
 
 abstract VariableExpression(ExpressionType) to Expression {
+	public var name(get, never):Token;
+
+	function get_name():Token {
+		return this.name;
+	}
+
 	public function new(name:Token) {
 		this = {
 			kind: EVariable,
