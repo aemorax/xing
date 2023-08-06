@@ -11,6 +11,11 @@ abstract Expression(ExpressionType) from ExpressionType to ExpressionType {
 
 	public var kind(get, never):ExpressionKind;
 	public var name(get, never):Null<Token>;
+	public var expr(get, never):Null<Expression>;
+	public var oper(get, never):Null<Token>;
+	public var type(get, never):Null<XingTemplateType>;
+	public var value(get, never):Dynamic;
+	private var evalue(never, set):Dynamic;
 
 	function get_kind():ExpressionKind {
 		return this.kind;
@@ -18,6 +23,26 @@ abstract Expression(ExpressionType) from ExpressionType to ExpressionType {
 
 	function get_name():Null<Token> {
 		return this.name;
+	}
+
+	function get_expr():Null<Expression> {
+		return this.e;
+	}
+
+	function get_oper():Null<Token> {
+		return this.op;
+	}
+
+	function get_type():Null<XingTemplateType> {
+		return this.type;
+	}
+
+	function get_value():Dynamic {
+		return this.value;
+	}
+
+	function set_evalue(val:Dynamic):Dynamic {
+		return this.value = val;
 	}
 
 	public function toString():String {
