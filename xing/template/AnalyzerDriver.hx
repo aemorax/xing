@@ -8,6 +8,7 @@ import xing.template.Expression.IteratorExpression;
 import xing.template.Expression.LiteralExpression;
 import xing.template.Expression.UnaryPostExpression;
 import xing.template.Expression.UnaryPrefixExpression;
+import xing.template.Expression.VariableExpression;
 import xing.template.Statement.BlockStatement;
 import xing.template.Statement.DocStatement;
 import xing.template.Statement.ExpressionStatement;
@@ -16,21 +17,22 @@ import xing.template.Statement.IfStatement;
 import xing.template.Statement.WhileStatement;
 
 interface AnalyzerDriver {
-	private function handleStatement(statement:Statement):Statement;
-	private function handleBlockStatement(statement:BlockStatement):Statement;
-	private function handleExpressionStatement(statement:ExpressionStatement):Statement;
-	private function handleIfStatement(statement:IfStatement):Statement;
-	private function handleWhileStatement(statement:WhileStatement):Statement;
-	private function handleForStatement(statement:ForStatement):Statement;
-	private function handleDocStatement(statement:DocStatement):Statement;
+	private function handleStatement(statement:Statement):Array<XingCode>;
+	private function handleBlockStatement(statement:BlockStatement):Array<XingCode>;
+	private function handleExpressionStatement(statement:ExpressionStatement):Array<XingCode>;
+	private function handleIfStatement(statement:IfStatement):Array<XingCode>;
+	private function handleWhileStatement(statement:WhileStatement):Array<XingCode>;
+	private function handleForStatement(statement:ForStatement):Array<XingCode>;
+	private function handleDocStatement(statement:DocStatement):Array<XingCode>;
 
-	private function handleExpression(expression:Expression):Expression;
-	private function handlePrefixUnaryExpression(expression:UnaryPrefixExpression):Expression;
-	private function handlePostfixUnaryExpression(expression:UnaryPostExpression):Expression;
-	private function handleBinaryExpression(expression:BinaryExpression):Expression;
-	private function handleGroupExpression(expression:GroupExpression):Expression;
-	private function handleLiteralExpression(expression:LiteralExpression):Expression;
-	private function handleAssignmentExpression(expression:AssignmentExpression):Expression;
-	private function handleIteratorExpression(expression:IteratorExpression):Expression;
-	private function handleForConditionExpression(expression:ForConditionExpression):Expression;
+	private function handleExpression(expression:Expression):XingCode;
+	private function handlePrefixUnaryExpression(expression:UnaryPrefixExpression):XingCode;
+	private function handlePostfixUnaryExpression(expression:UnaryPostExpression):XingCode;
+	private function handleBinaryExpression(expression:BinaryExpression):XingCode;
+	private function handleGroupExpression(expression:GroupExpression):XingCode;
+	private function handleLiteralExpression(expression:LiteralExpression):XingCode;
+	private function handleVariableExpression(expression:VariableExpression):XingCode;
+	private function handleAssignmentExpression(expression:AssignmentExpression):XingCode;
+	private function handleIteratorExpression(expression:IteratorExpression):XingCode;
+	private function handleForConditionExpression(expression:ForConditionExpression):XingCode;
 }

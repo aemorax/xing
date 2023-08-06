@@ -144,6 +144,22 @@ abstract BinaryExpression(ExpressionType) to Expression {
 	public static final logicalAndOp:Array<TokenCode> = [TDAmp];
 	public static final logicalOrOp:Array<TokenCode> = [TDPipe];
 
+	public var oper(get, never):Token;
+	public var left(get, never):Expression;
+	public var right(get, never):Expression;
+
+	function get_oper():Token {
+		return this.op;
+	}
+
+	function get_left():Expression {
+		return this.l;
+	}
+
+	function get_right():Expression {
+		return this.r;
+	}
+
 	public function new(left:Expression, opr:Token, right:Expression) {
 		this = {
 			kind: EBinary,
@@ -164,6 +180,22 @@ abstract GroupExpression(ExpressionType) to Expression {
 }
 
 abstract AssignmentExpression(ExpressionType) to Expression {
+	public var name(get, never):Null<Token>;
+	public var expr(get, never):Null<Expression>;
+	public var oper(get, never):Null<Token>;
+
+	function get_name():Null<Token> {
+		return this.name;
+	}
+
+	function get_expr():Null<Expression> {
+		return this.e;
+	}
+
+	function get_oper():Null<Token> {
+		return this.op;
+	}
+
 	public static final assignmentOps:Array<TokenCode> = [
 		TEqual,
 		TColonEqual,

@@ -24,6 +24,7 @@ class ExpressionStatement implements Statement {
 
 class BlockStatement implements Statement {
 	public final statements:Array<Statement>;
+	private static var _indentation:Int = 0;
 	public var kind(get, never):StatementKind;
 
 	public function new(statements:Array<Statement>) {
@@ -36,9 +37,12 @@ class BlockStatement implements Statement {
 
 	public function toString():String {
 		var s:String = "{\n";
+		_indentation++;
 		for (statement in statements) {
-			s += "\t" + statement.toString() + "\n";
+			for(i in 0..._indentation){s+="\t";}
+			s += statement.toString() + "\n";
 		}
+		_indentation--;
 		s += "}";
 		return s;
 	}
