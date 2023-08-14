@@ -25,14 +25,14 @@ interface AnalyzerDriver {
 	private function handleForStatement(statement:ForStatement):Array<XingCode>;
 	private function handleDocStatement(statement:DocStatement):Array<XingCode>;
 
-	private function handleExpression(expression:Expression):XingCode;
-	private function handlePrefixUnaryExpression(expression:UnaryPrefixExpression):XingCode;
-	private function handlePostfixUnaryExpression(expression:UnaryPostExpression):XingCode;
-	private function handleBinaryExpression(expression:BinaryExpression):XingCode;
-	private function handleGroupExpression(expression:GroupExpression):XingCode;
-	private function handleLiteralExpression(expression:LiteralExpression):XingCode;
-	private function handleVariableExpression(expression:VariableExpression):XingCode;
-	private function handleAssignmentExpression(expression:AssignmentExpression):XingCode;
-	private function handleIteratorExpression(expression:IteratorExpression):XingCode;
-	private function handleForConditionExpression(expression:ForConditionExpression):XingCode;
+	private function handleExpression(expression:Expression):Array<XingCode>;
+	private function handlePrefixUnaryExpression(expression:UnaryPrefixExpression):Array<XingCode>;
+	private function handlePostfixUnaryExpression(expression:UnaryPostExpression):Array<XingCode>;
+	private function handleBinaryExpression(expression:BinaryExpression):Array<XingCode>;
+	private function handleGroupExpression(expression:GroupExpression):Array<XingCode>;
+	private function handleLiteralExpression(expression:LiteralExpression):Array<XingCode>;
+	private function handleVariableExpression(expression:VariableExpression):Array<XingCode>;
+	private function handleAssignmentExpression(expression:AssignmentExpression):Array<XingCode>;
+	private function handleIteratorExpression(expression:IteratorExpression):Array<XingCode>;
+	private function handleForConditionExpression(expression:ForConditionExpression):Array<XingCode>;
 }

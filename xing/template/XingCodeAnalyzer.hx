@@ -10,15 +10,14 @@ import xing.template.Statement.WhileStatement;
 
 class XingCodeAnalyzer extends BaseAnalyzerDriver {
 	private var pc:Int = 0;
-	private final queue:Array<XingCode> = new Array();
-
-	private final codeGen:Array<XingCode> = new Array();
 
 	public function new(ast:Statement) {
-		handleStatement(ast);
-		for (each in codeGen) {
+		var c = handleStatement(ast);
+
+		for(each in c) {
 			trace(each);
 		}
+
 	}
 
 	override function handleBlockStatement(statement:BlockStatement):Array<XingCode> {
@@ -37,191 +36,178 @@ class XingCodeAnalyzer extends BaseAnalyzerDriver {
 			opcode: DOC,
 			arg1: {Variable: statement.token.literal}
 		};
-		codeGen.push(node);
 		return [node];
 	}
 
 	override function handleWhileStatement(statement:WhileStatement):Array<XingCode> {
 		var codes:Array<XingCode> = [];
-		handleStatement(statement.body);
-		queue.reverse();
-		while (queue.length != 0) {
-			codes.push(queue.pop());
-		}
-
+		var body = handleStatement(statement.body);
 		var condition = handleExpression(statement.condition);
 
-		while (queue.length != 0) {
-			codes.push(queue.pop());
+		for(c in condition) {
+			codes.push(c);
 		}
-
-		codes.push(condition);
-
-		var jmp:XingCode = {
-			opcode: JMP,
-			arg1: {Address: Relative(codes.length)}
-		};
 
 		codes.push({
-			opcode: CEQ,
-			arg1: {Special: Accum},
-			arg2: {Literal: true},
-			arg3: {Address: Relative(-codes.length)}
+			opcode: JEQ,
+			arg1: {Literal: true},
+			arg2: {Special: Accum},
+			arg3: {Address: Relative(body.length+1)}
 		});
 
-		codeGen.push(jmp);
-		for (each in codes) {
-			codeGen.push(each);
+		for(c in body) {
+			codes.push(c);
 		}
-		codes.insert(0, jmp);
+
+		codes.push({
+			opcode: JMP,
+			arg1: {Address: Relative(-body.length-1-condition.length)}
+		});
 		return codes;
 	}
 
 	override function handleExpressionStatement(statement:ExpressionStatement):Array<XingCode> {
 		var node = handleExpression(statement.expression);
-		queue.push(node);
-		return [node];
+		return node;
 	}
 
 	override function handleIfStatement(statement:IfStatement):Array<XingCode> {
 		var codes:Array<XingCode> = [];
 
 		var condition = handleExpression(statement.condition);
-		codes.push(condition);
+		var thenBlock = handleStatement(statement.thenBlock);
+		var elseBlock : Array<XingCode> = [];
+		if(statement.elseBlock != null)
+			elseBlock = handleStatement(statement.elseBlock);
 
-		handleStatement(statement.thenBlock);
-		var then:Array<XingCode> = [];
-		queue.reverse();
-		while (queue.length != 0) {
-			then.push(queue.pop());
+		for(c in condition) {
+			codes.push(c);
 		}
 
+		var jumpToNext : Int = (elseBlock.length == 0) ? thenBlock.length+1 : thenBlock.length+2;
 		codes.push({
-			opcode: CNQ,
-			arg1: {Special: Accum},
-			arg2: {Literal: true},
-			arg3: {Address: Relative(codes.length + then.length)}
+			opcode: JEQ,
+			arg1: {Literal: false},
+			arg2: {Special: Accum},
+			arg3: {Address: Relative(jumpToNext)}
 		});
 
-		codes = codes.concat(then);
-
-		if (statement.elseBlock != null) {
-			handleStatement(statement.elseBlock);
-			while (queue.length != 0) {
-				codes.push(queue.pop());
-			}
+		for(c in thenBlock) {
+			codes.push(c);
 		}
 
-		for (each in codes) {
-			codeGen.push(each);
+		if(elseBlock.length != 0) {
+			jumpToNext = elseBlock.length+1;
+			codes.push({
+				opcode: JMP,
+				arg1: {Address: Relative(jumpToNext)}
+			});
+
+			for(c in elseBlock) {
+				codes.push(c);
+			}
 		}
 
 		return codes;
 	}
 
-	override function handleAssignmentExpression(expression:Expression):XingCode {
-		var ret:XingCode;
+	override function handleAssignmentExpression(expression:Expression):Array<XingCode> {
+		var ret:Array<XingCode> = [];
 		switch (expression.oper.code) {
 			case TEqual:
-				ret = {
+				var assCode : XingCode;
+				assCode = {
 					opcode: MOV,
 					arg2: {Variable: expression.name.literal}
 				}
 				if (expression.expr.kind != ELiteral) {
-					queue.push(handleExpression(expression.expr));
-					ret.arg1 = {Special: Accum};
+					for(c in handleExpression(expression.expr))
+						ret.push(c);
+					assCode.arg1 = {Special: Accum};
 				} else {
-					ret.arg1 = {Literal: expression.expr.value};
+					assCode.arg1 = {Literal: expression.expr.value};
 				}
-				return ret;
-			case TPlusEqual:
-				ret = {
-					opcode: MOV,
-					arg1: {Special: Accum},
-					arg2: {Variable: expression.name.literal}
-				}
-				var comp:XingCode = {
-					opcode: ADD,
-					arg2: {Variable: expression.name.literal}
-				}
-				if (expression.expr.kind != ELiteral) {
-					queue.push(handleExpression(expression.expr));
-				} else {
-					comp.arg1 = {Literal: expression.expr.value};
-				}
-				queue.push(comp);
+				ret.push(assCode);
 				return ret;
 			default:
 		}
 		return null;
 	}
 
-	override function handleBinaryExpression(expression:BinaryExpression):XingCode {
-		var ret:XingCode = {
+	override function handleBinaryExpression(expression:BinaryExpression):Array<XingCode> {
+		var ret:Array<XingCode> = [];
+		var self : XingCode = {
 			opcode: NOP
 		};
 		switch (expression.oper.code) {
 			case TPlus:
-				ret.opcode = ADD;
+				self.opcode = ADD;
 			case TMinus:
-				ret.opcode = SUB;
+				self.opcode = SUB;
 			case TAsterisk:
-				ret.opcode = MUL;
+				self.opcode = MUL;
 			case TSlash:
-				ret.opcode = DIV;
+				self.opcode = DIV;
 			case TPrcent:
-				ret.opcode = MOD;
+				self.opcode = MOD;
 			case TCaret:
-				ret.opcode = XOR;
+				self.opcode = XOR;
 			case TPipe:
-				ret.opcode = ORA;
+				self.opcode = ORA;
 			case TAmp:
-				ret.opcode = AND;
+				self.opcode = AND;
 			case TALBrakBrak:
-				ret.opcode = SHL;
+				self.opcode = SHL;
 			case TARBrakBrak:
-				ret.opcode = SHR;
+				self.opcode = SHR;
 			case TDAmp:
-				ret.opcode = LGA;
+				self.opcode = LGA;
 			case TDPipe:
-				ret.opcode = LGO;
+				self.opcode = LGO;
 			case TDEqual:
-				ret.opcode = CEQ;
+				self.opcode = CEQ;
 			case TNEqual:
-				ret.opcode = CNQ;
+				self.opcode = CNQ;
 			case TALBrak:
-				ret.opcode = CLT;
+				self.opcode = CLT;
 			case TARBrak:
-				ret.opcode = CGT;
+				self.opcode = CGT;
 			case TALBrakEqual:
-				ret.opcode = CLTE;
+				self.opcode = CLTE;
 			case TARBrakEqual:
-				ret.opcode = CGTE;
+				self.opcode = CGTE;
 			default:
 		}
+
 		if (expression.left.kind != ELiteral) {
-			queue.push(handleExpression(expression.left));
-			ret.arg1 = {Special: Accum};
+			for(c in handleExpression(expression.left)) {
+				ret.push(c);
+			}
+			self.arg1 = {Special: Accum};
 		} else {
-			ret.arg1 = {Literal: expression.left.value};
+			self.arg1 = {Literal: expression.left.value};
 		}
 
 		if (expression.right.kind != ELiteral) {
-			queue.push(handleExpression(expression.right));
-			ret.arg2 = {Special: Accum};
+			for(c in handleExpression(expression.right)) {
+				ret.push(c);
+			}
+			self.arg2 = {Special: Accum};
 		} else {
-			ret.arg2 = {Literal: expression.right.value};
+			self.arg2 = {Literal: expression.right.value};
 		}
+
+		ret.push(self);
 
 		return ret;
 	}
 
-	override function handleVariableExpression(expression:VariableExpression):XingCode {
+	override function handleVariableExpression(expression:VariableExpression):Array<XingCode> {
 		var code:XingCode = {
 			opcode: LDA,
 			arg1: {Variable: expression.name.literal}
 		};
 
-		return code;
+		return [code];
 	}
 }

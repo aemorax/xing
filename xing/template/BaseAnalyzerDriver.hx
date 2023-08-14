@@ -59,7 +59,7 @@ class BaseAnalyzerDriver implements AnalyzerDriver {
 		throw new haxe.exceptions.NotImplementedException();
 	}
 
-	function handleExpression(expression:Expression):XingCode {
+	function handleExpression(expression:Expression):Array<XingCode> {
 		switch (expression.kind) {
 			case ELiteral:
 				return handleLiteralExpression(cast expression);
@@ -88,39 +88,39 @@ class BaseAnalyzerDriver implements AnalyzerDriver {
 		throw new AnalyzerException("Expression kind is unknown.", expression);
 	}
 
-	function handlePrefixUnaryExpression(expression:UnaryPrefixExpression):XingCode {
+	function handlePrefixUnaryExpression(expression:UnaryPrefixExpression):Array<XingCode> {
 		throw new haxe.exceptions.NotImplementedException();
 	}
 
-	function handlePostfixUnaryExpression(expression:UnaryPostExpression):XingCode {
+	function handlePostfixUnaryExpression(expression:UnaryPostExpression):Array<XingCode> {
 		throw new haxe.exceptions.NotImplementedException();
 	}
 
-	function handleBinaryExpression(expression:BinaryExpression):XingCode {
+	function handleBinaryExpression(expression:BinaryExpression):Array<XingCode> {
 		throw new haxe.exceptions.NotImplementedException();
 	}
 
-	function handleGroupExpression(expression:GroupExpression):XingCode {
+	function handleGroupExpression(expression:GroupExpression):Array<XingCode> {
 		throw new haxe.exceptions.NotImplementedException();
 	}
 
-	function handleLiteralExpression(expression:LiteralExpression):XingCode {
+	function handleLiteralExpression(expression:LiteralExpression):Array<XingCode> {
 		throw new haxe.exceptions.NotImplementedException();
 	}
 
-	function handleAssignmentExpression(expression:AssignmentExpression):XingCode {
+	function handleAssignmentExpression(expression:AssignmentExpression):Array<XingCode> {
 		throw new haxe.exceptions.NotImplementedException();
 	}
 
-	function handleIteratorExpression(expression:IteratorExpression):XingCode {
+	function handleIteratorExpression(expression:IteratorExpression):Array<XingCode> {
 		throw new haxe.exceptions.NotImplementedException();
 	}
 
-	function handleForConditionExpression(expression:ForConditionExpression):XingCode {
+	function handleForConditionExpression(expression:ForConditionExpression):Array<XingCode> {
 		throw new haxe.exceptions.NotImplementedException();
 	}
 
-	function handleVariableExpression(expression:VariableExpression):XingCode {
+	function handleVariableExpression(expression:VariableExpression):Array<XingCode> {
 		throw new haxe.exceptions.NotImplementedException();
 	}
 }

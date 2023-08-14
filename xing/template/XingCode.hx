@@ -18,6 +18,8 @@ enum XingOpCode {
 	SHL;
 	SHR;
 	JMP;
+	JEQ;
+	JNQ;
 	ADD;
 	SUB;
 	MUL;
