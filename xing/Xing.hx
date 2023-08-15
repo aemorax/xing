@@ -29,7 +29,7 @@ class Xing {
 		routes.set(path, callback);
 	}
 
-	public function listen(?host:String, ?ports:Array<Int> = null) {
+	public function listen(?host:String="0.0.0.0", ?ports:Array<Int> = null) {
 		if (ports == null)
 			ports = [3000];
 
