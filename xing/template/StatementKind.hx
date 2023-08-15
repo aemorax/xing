@@ -7,4 +7,5 @@ enum abstract StatementKind(Int) from Int to Int {
 	var SWhile;
 	var SFor;
 	var SDoc;
+	var STempl;
 }

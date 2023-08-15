@@ -1,5 +1,6 @@
 package xing.template;
 
+import xing.template.Statement.TemplateStatement;
 import xing.template.Expression.AssignmentExpression;
 import xing.template.Expression.BinaryExpression;
 import xing.template.Expression.ForConditionExpression;
@@ -30,6 +31,7 @@ interface AnalyzerDriver {
 	private function handleWhileStatement(statement:WhileStatement):Array<XingCode>;
 	private function handleForStatement(statement:ForStatement):Array<XingCode>;
 	private function handleDocStatement(statement:DocStatement):Array<XingCode>;
+	private function handleTemplateStatement(statement:TemplateStatement):Array<XingCode>;
 
 	private function handleExpression(expression:Expression):Array<XingCode>;
 	private function handlePrefixUnaryExpression(expression:UnaryPrefixExpression):Array<XingCode>;

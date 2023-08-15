@@ -1,5 +1,6 @@
 package xing.template;
 
+import haxe.ds.ReadOnlyArray;
 import xing.exception.template.AnalyzerException;
 import xing.template.AnalyzerDriver.ForConditionCode;
 import xing.template.Expression.BinaryExpression;
@@ -12,17 +13,14 @@ import xing.template.Statement.DocStatement;
 import xing.template.Statement.ExpressionStatement;
 import xing.template.Statement.ForStatement;
 import xing.template.Statement.IfStatement;
+import xing.template.Statement.TemplateStatement;
 import xing.template.Statement.WhileStatement;
 
 class XingCodeAnalyzer extends BaseAnalyzerDriver {
-	private var pc:Int = 0;
+	public final analyzedCode : ReadOnlyArray<XingCode>;
 
 	public function new(ast:Statement) {
-		var c = handleStatement(ast);
-
-		for (each in c) {
-			trace(each);
-		}
+		analyzedCode = handleStatement(ast);
 	}
 
 	override function handleBlockStatement(statement:BlockStatement):Array<XingCode> {
@@ -57,7 +55,7 @@ class XingCodeAnalyzer extends BaseAnalyzerDriver {
 			opcode: JEQ,
 			arg1: {Literal: true},
 			arg2: {Special: Accum},
-			arg3: {Address: Relative(body.length + 1)}
+			arg3: {Address: Relative(body.length + 2)}
 		});
 
 		for (c in body) {
@@ -184,22 +182,28 @@ class XingCodeAnalyzer extends BaseAnalyzerDriver {
 			default:
 		}
 
-		if (expression.left.kind != ELiteral) {
-			for (c in handleExpression(expression.left)) {
-				ret.push(c);
-			}
-			self.arg1 = {Special: Accum};
-		} else {
-			self.arg1 = {Literal: expression.left.value};
+		switch (expression.left.kind) {
+			case ELiteral:
+				self.arg1 = {Literal: expression.left.value};
+			case EVariable:
+				self.arg1 = {Variable: expression.left.name.literal};
+			default:
+				for (c in handleExpression(expression.left)) {
+					ret.push(c);
+				}
+				self.arg1 = {Special: Accum};
 		}
 
-		if (expression.right.kind != ELiteral) {
-			for (c in handleExpression(expression.right)) {
-				ret.push(c);
-			}
-			self.arg2 = {Special: Accum};
-		} else {
-			self.arg2 = {Literal: expression.right.value};
+		switch (expression.right.kind) {
+			case ELiteral:
+				self.arg2 = {Literal: expression.right.value};
+			case EVariable:
+				self.arg2 = {Variable: expression.right.name.literal};
+			default:
+				for (c in handleExpression(expression.right)) {
+					ret.push(c);
+				}
+				self.arg2 = {Special: Accum};
 		}
 
 		ret.push(self);
@@ -294,5 +298,13 @@ class XingCodeAnalyzer extends BaseAnalyzerDriver {
 		}
 
 		return codes;
+	}
+
+	override function handleTemplateStatement(statement:TemplateStatement):Array<XingCode> {
+		var code = handleExpression(statement.expression);
+		code.push({
+			opcode: EVL
+		});
+		return code;
 	}
 }

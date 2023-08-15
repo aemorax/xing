@@ -1,5 +1,6 @@
 package xing.template;
 
+import xing.template.Statement.TemplateStatement;
 import xing.exception.template.ParserException;
 import xing.template.Expression.AssignmentExpression;
 import xing.template.Expression.BinaryExpression;
@@ -48,14 +49,18 @@ class Parser {
 			advance();
 			return forStatement();
 		}
-		if (match(TDoc)) {
-			return docStatement();
+		if (match(TDDollar)) {
+			advance();
+			return templateStatement();
 		}
 		if (match(TLBrac)) {
 			advance();
 			return block();
 		}
-
+		if (match(TDoc)) {
+			return docStatement();
+		}
+		
 		return expressionStatement();
 	}
 
@@ -111,6 +116,13 @@ class Parser {
 
 		var body:Statement = statement();
 		return new ForStatement(condition, body);
+	}
+
+	private inline function templateStatement():TemplateStatement {
+		var innerExpression = expression();
+		consume(TDDollar, "Expected '$$' after template.");
+
+		return new TemplateStatement(innerExpression);
 	}
 
 	private inline function docStatement():DocStatement {

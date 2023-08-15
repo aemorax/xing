@@ -40,6 +40,8 @@ enum XingOpCode {
 	LGO; // logical or
 
 	LDA; // load to accumulator
+
+	EVL; // Evaluate everything inside accumulator.
 }
 
 typedef OpcodeArg = {

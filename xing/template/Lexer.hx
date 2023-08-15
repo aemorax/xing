@@ -175,6 +175,11 @@ class Lexer {
 						return string("'");
 					case '"':
 						return string('"');
+					case "$":
+						if (match("$")) {
+							return newToken(TDDollar);
+						}
+						throw new LexerException("$ must be followed with $", current, fileName);
 					case "\t", "\r", " ":
 						return null;
 					case "\n":

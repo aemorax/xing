@@ -1,5 +1,6 @@
 package xing.template;
 
+import xing.template.Statement.TemplateStatement;
 import xing.exception.template.AnalyzerException;
 import xing.template.AnalyzerDriver.ForConditionCode;
 import xing.template.Expression.AssignmentExpression;
@@ -33,6 +34,8 @@ class BaseAnalyzerDriver implements AnalyzerDriver {
 				return handleWhileStatement(cast statement);
 			case SIf:
 				return handleIfStatement(cast statement);
+			case STempl:
+				return handleTemplateStatement(cast statement);
 		}
 	}
 
@@ -122,6 +125,10 @@ class BaseAnalyzerDriver implements AnalyzerDriver {
 	}
 
 	function handleVariableExpression(expression:VariableExpression):Array<XingCode> {
+		throw new haxe.exceptions.NotImplementedException();
+	}
+
+	function handleTemplateStatement(statement:TemplateStatement):Array<XingCode> {
 		throw new haxe.exceptions.NotImplementedException();
 	}
 }

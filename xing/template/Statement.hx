@@ -127,3 +127,20 @@ class DocStatement implements Statement {
 		return SDoc;
 	}
 }
+
+class TemplateStatement implements Statement {
+	public final expression:Expression;
+	public var kind(get, never):StatementKind;
+
+	public function new(expression:Expression) {
+		this.expression = expression;
+	}
+
+	public function toString():String {
+		return "template: " + this.expression.toString();
+	}
+
+	function get_kind():StatementKind {
+		return STempl;
+	}
+}
