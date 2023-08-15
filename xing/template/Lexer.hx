@@ -1,8 +1,8 @@
 package xing.template;
 
 import haxe.exceptions.NotImplementedException;
-import xing.util.LexerUtil;
 import xing.exception.template.LexerException;
+import xing.util.LexerUtil;
 
 class Lexer {
 	final source:String;
@@ -197,6 +197,10 @@ class Lexer {
 	}
 
 	private inline function newToken(token:TokenCode, ?length:Int = 0, ?literal:String = ""):Token {
+		if (token == TString) {
+			start += 1;
+			length -= 2;
+		}
 		literal = literal == "" ? this.source.substr(start, length) : literal;
 		var tok = new Token(token, start, length, literal);
 		this.length = 0;

@@ -1,7 +1,6 @@
 package xing.template;
 
 import xing.exception.template.ParserException;
-import xing.template.ExpressionType.XingTemplateType;
 import xing.template.ExpressionType;
 
 abstract Expression(ExpressionType) from ExpressionType to ExpressionType {
@@ -15,6 +14,7 @@ abstract Expression(ExpressionType) from ExpressionType to ExpressionType {
 	public var oper(get, never):Null<Token>;
 	public var type(get, never):Null<XingTemplateType>;
 	public var value(get, never):Dynamic;
+
 	private var evalue(never, set):Dynamic;
 
 	function get_kind():ExpressionKind {
@@ -77,6 +77,12 @@ abstract Expression(ExpressionType) from ExpressionType to ExpressionType {
 }
 
 abstract LiteralExpression(ExpressionType) to Expression {
+	public var value(get, never):Dynamic;
+
+	function get_value():Dynamic {
+		return this.value;
+	}
+
 	public function new(value:Dynamic, type:XingTemplateType) {
 		this = {
 			kind: ELiteral,

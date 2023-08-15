@@ -7,6 +7,7 @@ import xing.template.Expression.BinaryExpression;
 import xing.template.Expression.ForConditionExpression;
 import xing.template.Expression.GroupExpression;
 import xing.template.Expression.IteratorExpression;
+import xing.template.Expression.LiteralExpression;
 import xing.template.Expression.VariableExpression;
 import xing.template.Statement.BlockStatement;
 import xing.template.Statement.DocStatement;
@@ -17,10 +18,16 @@ import xing.template.Statement.TemplateStatement;
 import xing.template.Statement.WhileStatement;
 
 class XingCodeAnalyzer extends BaseAnalyzerDriver {
-	public final analyzedCode : ReadOnlyArray<XingCode>;
+	public final ir:ReadOnlyArray<XingCode>;
 
 	public function new(ast:Statement) {
-		analyzedCode = handleStatement(ast);
+		var a = handleStatement(ast);
+		a.push({opcode: EOF});
+		ir = a;
+	}
+
+	override function handleLiteralExpression(expression:LiteralExpression):Array<XingCode> {
+		return [{opcode: LDA, arg1: {kind: Literal, Literal: expression.value}}];
 	}
 
 	override function handleBlockStatement(statement:BlockStatement):Array<XingCode> {
@@ -37,7 +44,7 @@ class XingCodeAnalyzer extends BaseAnalyzerDriver {
 	override function handleDocStatement(statement:DocStatement):Array<XingCode> {
 		var node:XingCode = {
 			opcode: DOC,
-			arg1: {Variable: statement.token.literal}
+			arg1: {kind: Literal, Literal: statement.token.literal}
 		};
 		return [node];
 	}
@@ -52,10 +59,10 @@ class XingCodeAnalyzer extends BaseAnalyzerDriver {
 		}
 
 		codes.push({
-			opcode: JEQ,
-			arg1: {Literal: true},
-			arg2: {Special: Accum},
-			arg3: {Address: Relative(body.length + 2)}
+			opcode: JNQ,
+			arg1: {kind: Literal, Literal: true},
+			arg2: {kind: Special, Special: Accum},
+			arg3: {kind: Address, Address: Relative(body.length + 2)}
 		});
 
 		for (c in body) {
@@ -64,7 +71,7 @@ class XingCodeAnalyzer extends BaseAnalyzerDriver {
 
 		codes.push({
 			opcode: JMP,
-			arg1: {Address: Relative(-body.length - 1 - condition.length)}
+			arg1: {kind: Address, Address: Relative(-body.length - 1 - condition.length)}
 		});
 		return codes;
 	}
@@ -90,9 +97,9 @@ class XingCodeAnalyzer extends BaseAnalyzerDriver {
 		var jumpToNext:Int = (elseBlock.length == 0) ? thenBlock.length + 1 : thenBlock.length + 2;
 		codes.push({
 			opcode: JEQ,
-			arg1: {Literal: false},
-			arg2: {Special: Accum},
-			arg3: {Address: Relative(jumpToNext)}
+			arg1: {kind: Literal, Literal: false},
+			arg2: {kind: Special, Special: Accum},
+			arg3: {kind: Address, Address: Relative(jumpToNext)}
 		});
 
 		for (c in thenBlock) {
@@ -103,7 +110,7 @@ class XingCodeAnalyzer extends BaseAnalyzerDriver {
 			jumpToNext = elseBlock.length + 1;
 			codes.push({
 				opcode: JMP,
-				arg1: {Address: Relative(jumpToNext)}
+				arg1: {kind: Address, Address: Relative(jumpToNext)}
 			});
 
 			for (c in elseBlock) {
@@ -121,14 +128,14 @@ class XingCodeAnalyzer extends BaseAnalyzerDriver {
 				var assCode:XingCode;
 				assCode = {
 					opcode: MOV,
-					arg2: {Variable: expression.name.literal}
+					arg2: {kind: Variable, Variable: expression.name.literal}
 				}
 				if (expression.expr.kind != ELiteral) {
 					for (c in handleExpression(expression.expr))
 						ret.push(c);
-					assCode.arg1 = {Special: Accum};
+					assCode.arg1 = {kind: Special, Special: Accum};
 				} else {
-					assCode.arg1 = {Literal: expression.expr.value};
+					assCode.arg1 = {kind: Literal, Literal: expression.expr.value};
 				}
 				ret.push(assCode);
 				return ret;
@@ -184,26 +191,26 @@ class XingCodeAnalyzer extends BaseAnalyzerDriver {
 
 		switch (expression.left.kind) {
 			case ELiteral:
-				self.arg1 = {Literal: expression.left.value};
+				self.arg1 = {kind: Literal, Literal: expression.left.value};
 			case EVariable:
-				self.arg1 = {Variable: expression.left.name.literal};
+				self.arg1 = {kind: Variable, Variable: expression.left.name.literal};
 			default:
 				for (c in handleExpression(expression.left)) {
 					ret.push(c);
 				}
-				self.arg1 = {Special: Accum};
+				self.arg1 = {kind: Special, Special: Accum};
 		}
 
 		switch (expression.right.kind) {
 			case ELiteral:
-				self.arg2 = {Literal: expression.right.value};
+				self.arg2 = {kind: Literal, Literal: expression.right.value};
 			case EVariable:
-				self.arg2 = {Variable: expression.right.name.literal};
+				self.arg2 = {kind: Variable, Variable: expression.right.name.literal};
 			default:
 				for (c in handleExpression(expression.right)) {
 					ret.push(c);
 				}
-				self.arg2 = {Special: Accum};
+				self.arg2 = {kind: Special, Special: Accum};
 		}
 
 		ret.push(self);
@@ -214,7 +221,7 @@ class XingCodeAnalyzer extends BaseAnalyzerDriver {
 	override function handleVariableExpression(expression:VariableExpression):Array<XingCode> {
 		var code:XingCode = {
 			opcode: LDA,
-			arg1: {Variable: expression.name.literal}
+			arg1: {kind: Variable, Variable: expression.name.literal}
 		};
 
 		return [code];
@@ -275,10 +282,10 @@ class XingCodeAnalyzer extends BaseAnalyzerDriver {
 				}
 
 				codes.push({
-					opcode: JEQ,
-					arg1: {Literal: true},
-					arg2: {Special: Accum},
-					arg3: {Address: Relative(body.length + stepCode.length + 2)}
+					opcode: JNQ,
+					arg1: {kind: Literal, Literal: true},
+					arg2: {kind: Special, Special: Accum},
+					arg3: {kind: Address, Address: Relative(body.length + stepCode.length + 2)}
 				});
 
 				for (c in body) {
@@ -291,7 +298,7 @@ class XingCodeAnalyzer extends BaseAnalyzerDriver {
 
 				codes.push({
 					opcode: JMP,
-					arg1: {Address: Relative(-body.length - 1 - conditionCodes.cond.length - stepCode.length)}
+					arg1: {kind: Address, Address: Relative(-body.length - 1 - conditionCodes.cond.length - stepCode.length)}
 				});
 			default:
 				throw new AnalyzerException('Condition of type ${statement.condition.kind} is not supported.');

@@ -1,8 +1,7 @@
 package xing.template;
 
 enum abstract Speical(Int) from Int to Int {
-	var Next = -1;
-	var Accum = -2;
+	var Accum = 1;
 }
 
 enum Address {
@@ -12,48 +11,53 @@ enum Address {
 
 enum XingOpCode {
 	NOP;
+
 	ORA;
 	XOR;
 	AND;
 	SHL;
 	SHR;
-	JMP;
-	JEQ;
-	JNQ;
 	ADD;
 	SUB;
 	MUL;
 	DIV;
 	MOD;
-	JLT;
-	MOV;
-	DOC;
-
+	LGA; // logical and
+	LGO; // logical or
+	JMP;
+	JEQ;
+	JNQ;
 	CEQ; // check equality
 	CNQ;
 	CLT;
 	CGT;
 	CLTE;
 	CGTE;
-
-	LGA; // logical and
-	LGO; // logical or
-
 	LDA; // load to accumulator
-
+	MOV;
 	EVL; // Evaluate everything inside accumulator.
+	DOC;
+	EOF;
 }
 
 typedef OpcodeArg = {
-	var ?Literal : Dynamic;
-	var ?Special : Speical;
-	var ?Address : Address;
-	var ?Variable : String;
+	var kind:OpcodeArgKind;
+	var ?Literal:Dynamic;
+	var ?Special:Speical;
+	var ?Address:Address;
+	var ?Variable:String;
+}
+
+enum OpcodeArgKind {
+	Literal;
+	Special;
+	Address;
+	Variable;
 }
 
 typedef XingCode = {
-	var opcode : XingOpCode;
-	var ?arg1 : OpcodeArg;
-	var ?arg2 : OpcodeArg;
-	var ?arg3 : OpcodeArg;
+	var opcode:XingOpCode;
+	var ?arg1:OpcodeArg;
+	var ?arg2:OpcodeArg;
+	var ?arg3:OpcodeArg;
 }
