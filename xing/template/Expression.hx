@@ -177,6 +177,12 @@ abstract BinaryExpression(ExpressionType) to Expression {
 }
 
 abstract GroupExpression(ExpressionType) to Expression {
+	public var inside(get, never):Null<Expression>;
+
+	function get_inside():Null<Expression> {
+		return this.e;
+	}
+
 	public function new(expression:Expression) {
 		this = {
 			kind: EGroup,
@@ -240,6 +246,22 @@ abstract IteratorExpression(ExpressionType) to Expression {
 }
 
 abstract ForConditionExpression(ExpressionType) to Expression {
+	public var init(get, never):Null<Expression>;
+	public var cond(get, never):Null<Expression>;
+	public var step(get, never):Null<Expression>;
+
+	function get_init():Null<Expression> {
+		return this.l;
+	}
+
+	function get_cond():Null<Expression> {
+		return this.e;
+	}
+
+	function get_step():Null<Expression> {
+		return this.r;
+	}
+
 	public function new(init:Expression, condition:Expression, step:Expression) {
 		this = {
 			kind: EForCondition,

@@ -1,6 +1,7 @@
 package xing.template;
 
 import xing.exception.template.AnalyzerException;
+import xing.template.AnalyzerDriver.ForConditionCode;
 import xing.template.Expression.AssignmentExpression;
 import xing.template.Expression.BinaryExpression;
 import xing.template.Expression.ForConditionExpression;
@@ -79,10 +80,10 @@ class BaseAnalyzerDriver implements AnalyzerDriver {
 				return handleAssignmentExpression(cast expression);
 			case ECompAssignment:
 				return handleAssignmentExpression(cast expression);
-			case EForCondition:
-				return handleForConditionExpression(cast expression);
 			case EIterator:
-				return handleForConditionExpression(cast expression);
+				return handleIteratorExpression(cast expression);
+			default:
+				throw new AnalyzerException('Expression of type ${expression.kind} is not allowed here.');
 		}
 
 		throw new AnalyzerException("Expression kind is unknown.", expression);
@@ -116,7 +117,7 @@ class BaseAnalyzerDriver implements AnalyzerDriver {
 		throw new haxe.exceptions.NotImplementedException();
 	}
 
-	function handleForConditionExpression(expression:ForConditionExpression):Array<XingCode> {
+	function handleForConditionExpression(expression:ForConditionExpression):ForConditionCode {
 		throw new haxe.exceptions.NotImplementedException();
 	}
 

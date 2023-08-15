@@ -16,6 +16,12 @@ import xing.template.Statement.ForStatement;
 import xing.template.Statement.IfStatement;
 import xing.template.Statement.WhileStatement;
 
+typedef ForConditionCode = {
+	var ?init : Array<XingCode>;
+	var ?cond : Array<XingCode>;
+	var ?step : Array<XingCode>;
+}
+
 interface AnalyzerDriver {
 	private function handleStatement(statement:Statement):Array<XingCode>;
 	private function handleBlockStatement(statement:BlockStatement):Array<XingCode>;
@@ -34,5 +40,5 @@ interface AnalyzerDriver {
 	private function handleVariableExpression(expression:VariableExpression):Array<XingCode>;
 	private function handleAssignmentExpression(expression:AssignmentExpression):Array<XingCode>;
 	private function handleIteratorExpression(expression:IteratorExpression):Array<XingCode>;
-	private function handleForConditionExpression(expression:ForConditionExpression):Array<XingCode>;
+	private function handleForConditionExpression(expression:ForConditionExpression):ForConditionCode;
 }

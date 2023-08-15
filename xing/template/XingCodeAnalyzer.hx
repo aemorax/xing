@@ -1,10 +1,16 @@
 package xing.template;
 
+import xing.exception.template.AnalyzerException;
+import xing.template.AnalyzerDriver.ForConditionCode;
 import xing.template.Expression.BinaryExpression;
+import xing.template.Expression.ForConditionExpression;
+import xing.template.Expression.GroupExpression;
+import xing.template.Expression.IteratorExpression;
 import xing.template.Expression.VariableExpression;
 import xing.template.Statement.BlockStatement;
 import xing.template.Statement.DocStatement;
 import xing.template.Statement.ExpressionStatement;
+import xing.template.Statement.ForStatement;
 import xing.template.Statement.IfStatement;
 import xing.template.Statement.WhileStatement;
 
@@ -14,10 +20,9 @@ class XingCodeAnalyzer extends BaseAnalyzerDriver {
 	public function new(ast:Statement) {
 		var c = handleStatement(ast);
 
-		for(each in c) {
+		for (each in c) {
 			trace(each);
 		}
-
 	}
 
 	override function handleBlockStatement(statement:BlockStatement):Array<XingCode> {
@@ -44,7 +49,7 @@ class XingCodeAnalyzer extends BaseAnalyzerDriver {
 		var body = handleStatement(statement.body);
 		var condition = handleExpression(statement.condition);
 
-		for(c in condition) {
+		for (c in condition) {
 			codes.push(c);
 		}
 
@@ -52,16 +57,16 @@ class XingCodeAnalyzer extends BaseAnalyzerDriver {
 			opcode: JEQ,
 			arg1: {Literal: true},
 			arg2: {Special: Accum},
-			arg3: {Address: Relative(body.length+1)}
+			arg3: {Address: Relative(body.length + 1)}
 		});
 
-		for(c in body) {
+		for (c in body) {
 			codes.push(c);
 		}
 
 		codes.push({
 			opcode: JMP,
-			arg1: {Address: Relative(-body.length-1-condition.length)}
+			arg1: {Address: Relative(-body.length - 1 - condition.length)}
 		});
 		return codes;
 	}
@@ -76,15 +81,15 @@ class XingCodeAnalyzer extends BaseAnalyzerDriver {
 
 		var condition = handleExpression(statement.condition);
 		var thenBlock = handleStatement(statement.thenBlock);
-		var elseBlock : Array<XingCode> = [];
-		if(statement.elseBlock != null)
+		var elseBlock:Array<XingCode> = [];
+		if (statement.elseBlock != null)
 			elseBlock = handleStatement(statement.elseBlock);
 
-		for(c in condition) {
+		for (c in condition) {
 			codes.push(c);
 		}
 
-		var jumpToNext : Int = (elseBlock.length == 0) ? thenBlock.length+1 : thenBlock.length+2;
+		var jumpToNext:Int = (elseBlock.length == 0) ? thenBlock.length + 1 : thenBlock.length + 2;
 		codes.push({
 			opcode: JEQ,
 			arg1: {Literal: false},
@@ -92,18 +97,18 @@ class XingCodeAnalyzer extends BaseAnalyzerDriver {
 			arg3: {Address: Relative(jumpToNext)}
 		});
 
-		for(c in thenBlock) {
+		for (c in thenBlock) {
 			codes.push(c);
 		}
 
-		if(elseBlock.length != 0) {
-			jumpToNext = elseBlock.length+1;
+		if (elseBlock.length != 0) {
+			jumpToNext = elseBlock.length + 1;
 			codes.push({
 				opcode: JMP,
 				arg1: {Address: Relative(jumpToNext)}
 			});
 
-			for(c in elseBlock) {
+			for (c in elseBlock) {
 				codes.push(c);
 			}
 		}
@@ -115,13 +120,13 @@ class XingCodeAnalyzer extends BaseAnalyzerDriver {
 		var ret:Array<XingCode> = [];
 		switch (expression.oper.code) {
 			case TEqual:
-				var assCode : XingCode;
+				var assCode:XingCode;
 				assCode = {
 					opcode: MOV,
 					arg2: {Variable: expression.name.literal}
 				}
 				if (expression.expr.kind != ELiteral) {
-					for(c in handleExpression(expression.expr))
+					for (c in handleExpression(expression.expr))
 						ret.push(c);
 					assCode.arg1 = {Special: Accum};
 				} else {
@@ -136,7 +141,7 @@ class XingCodeAnalyzer extends BaseAnalyzerDriver {
 
 	override function handleBinaryExpression(expression:BinaryExpression):Array<XingCode> {
 		var ret:Array<XingCode> = [];
-		var self : XingCode = {
+		var self:XingCode = {
 			opcode: NOP
 		};
 		switch (expression.oper.code) {
@@ -180,7 +185,7 @@ class XingCodeAnalyzer extends BaseAnalyzerDriver {
 		}
 
 		if (expression.left.kind != ELiteral) {
-			for(c in handleExpression(expression.left)) {
+			for (c in handleExpression(expression.left)) {
 				ret.push(c);
 			}
 			self.arg1 = {Special: Accum};
@@ -189,7 +194,7 @@ class XingCodeAnalyzer extends BaseAnalyzerDriver {
 		}
 
 		if (expression.right.kind != ELiteral) {
-			for(c in handleExpression(expression.right)) {
+			for (c in handleExpression(expression.right)) {
 				ret.push(c);
 			}
 			self.arg2 = {Special: Accum};
@@ -209,5 +214,85 @@ class XingCodeAnalyzer extends BaseAnalyzerDriver {
 		};
 
 		return [code];
+	}
+
+	override function handleGroupExpression(expression:GroupExpression):Array<XingCode> {
+		return handleExpression(expression.inside);
+	}
+
+	override function handleForConditionExpression(expression:ForConditionExpression):ForConditionCode {
+		var initCode:Array<XingCode> = [];
+		if (expression.init != null) {
+			initCode = handleExpression(expression.init);
+		}
+
+		var conditionCode:Array<XingCode> = [];
+		if (expression.cond != null) {
+			conditionCode = handleExpression(expression.cond);
+		}
+
+		var stepCode:Array<XingCode> = [];
+		if (expression.step != null) {
+			stepCode = handleExpression(expression.step);
+		}
+
+		return {
+			init: (initCode.length != 0 ? initCode : null),
+			cond: (conditionCode.length != 0 ? conditionCode : null),
+			step: (stepCode.length != 0 ? stepCode : null)
+		};
+	}
+
+	override function handleIteratorExpression(expression:IteratorExpression):Array<XingCode> {
+		return super.handleIteratorExpression(expression);
+	}
+
+	override function handleForStatement(statement:ForStatement):Array<XingCode> {
+		var codes:Array<XingCode> = [];
+		var body = handleStatement(statement.body);
+		switch (statement.condition.kind) {
+			case EForCondition:
+				var conditionCodes:ForConditionCode = handleForConditionExpression(cast statement.condition);
+				if (conditionCodes.init != null) {
+					for (c in conditionCodes.init) {
+						codes.push(c);
+					}
+				}
+
+				if (conditionCodes.cond != null) {
+					for (c in conditionCodes.cond) {
+						codes.push(c);
+					}
+				}
+
+				var stepCode:Array<XingCode> = [];
+				if (conditionCodes.step != null) {
+					stepCode = conditionCodes.step;
+				}
+
+				codes.push({
+					opcode: JEQ,
+					arg1: {Literal: true},
+					arg2: {Special: Accum},
+					arg3: {Address: Relative(body.length + stepCode.length + 2)}
+				});
+
+				for (c in body) {
+					codes.push(c);
+				}
+
+				for (c in stepCode) {
+					codes.push(c);
+				}
+
+				codes.push({
+					opcode: JMP,
+					arg1: {Address: Relative(-body.length - 1 - conditionCodes.cond.length - stepCode.length)}
+				});
+			default:
+				throw new AnalyzerException('Condition of type ${statement.condition.kind} is not supported.');
+		}
+
+		return codes;
 	}
 }
