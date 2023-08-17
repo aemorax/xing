@@ -74,7 +74,7 @@ class Xing {
 			try {
 				var req = parseRequest(client.socket.input);
 				if(routes.exists(req.request.path)) {
-					routes.get(req.request.path)(Request.fromParsedRequest(req.request, req.rawRequest), Response.fromOutput(client.socket.output));
+					routes.get(req.request.path)(Request.fromParsedRequest(req.request, req.body, req.rawRequest), Response.fromOutput(client.socket.output));
 				} else {
 					Response.notFound(client.socket.output);
 				}
@@ -89,7 +89,7 @@ class Xing {
 		}
 	}
 
-	private function parseRequest(input:haxe.io.Input):{rawRequest:String, request:ParsedRequest} {
+	private function parseRequest(input:haxe.io.Input):{body:haxe.io.Bytes, rawRequest:String, request:ParsedRequest} {
 		var reqString:String = "";
 		while (true) {
 			try {
@@ -102,9 +102,18 @@ class Xing {
 				break;
 			}
 		}
+		var parsedReq = PicoHttpParser.parseRequest(reqString);
+		var cLen = parsedReq.headers.get("Content-Length");
+		var body : haxe.io.Bytes = null;
+		if(cLen != null) {
+			body = haxe.io.Bytes.alloc(Std.parseInt(cLen));
+			input.readBytes(body, 0, Std.parseInt(cLen));
+		}
+
 		return {
 			rawRequest: reqString,
-			request: PicoHttpParser.parseRequest(reqString)
+			body: body,
+			request: parsedReq
 		};
 	}
 }
