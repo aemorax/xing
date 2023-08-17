@@ -2,7 +2,7 @@ package xing.response;
 
 class Response {
 	private var status : Int;
-	private var body : String;
+	private var body : haxe.io.Bytes;
 	private var headers : Map<String,String>;
 	private var cookies : Map<String, String>;
 	private var output : haxe.io.Output;
@@ -14,14 +14,14 @@ class Response {
 	public static function notFound(output:haxe.io.Output):Void {
 		var res : Response = new Response(output);
 		res.status = 404;
-		res.body = "<body><center><h1>404 NotFound</h1></center></body>";
+		res.body = haxe.io.Bytes.ofString("<body><center><h1>404 NotFound</h1></center></body>");
 		res.send();
 	}
 
 	function new(output:haxe.io.Output) {
 		this.output = output;
 		this.status = 200;
-		this.body = "";
+		this.body = haxe.io.Bytes.ofString("");
 		this.headers = new Map<String, String>();
 		this.cookies = new Map<String, String>();
 	}
@@ -31,11 +31,17 @@ class Response {
 	}
 
 	public function setBody(body:String):Void {
-		this.body = body;
+		this.body = haxe.io.Bytes.ofString(body);
+	}
+
+	public function setBytes(b:haxe.io.Bytes):Void {
+		this.body = b;
 	}
 
 	public function send():Void {
 		this.output.write(getResponse());
+		this.output.writeBytes(this.body, 0, this.body.length);
+		this.output.writeString("\r\n");
 		this.output.flush();
 	}
 
@@ -54,6 +60,6 @@ class Response {
 			default: "Unknown";
 		}
 		
-		return haxe.io.Bytes.ofString('HTTP/1.1 ${status} ${statusCode}\r\n${headersString}\r\n${body}\r\n');
+		return haxe.io.Bytes.ofString('HTTP/1.1 ${status} ${statusCode}\r\n${headersString}\r\n');
 	}
 }

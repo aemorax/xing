@@ -1,5 +1,8 @@
 package xing;
 
+import haxe.ds.GenericStack;
+import sys.io.File;
+import sys.FileSystem;
 import xing.request.Request;
 import xing.response.Response;
 import haxe.Exception;
@@ -27,6 +30,42 @@ class Xing {
 
 	public function registerRoute(path:String, callback:Request->Response->Void) {
 		routes.set(path, callback);
+	}
+
+	public function serveStatic(path:String, directory:String) {
+		var laters:GenericStack<String> = new GenericStack<String>();
+		var currentPath : String;
+		if(FileSystem.isDirectory(directory)) {
+			var current = FileSystem.readDirectory(directory);
+			for(each in current) {
+				currentPath = directory + "/" + each;
+				if(FileSystem.isDirectory(currentPath))
+					laters.add(each);
+				else
+					serveFile(path + "/" + each, currentPath);
+			}
+			while(!laters.isEmpty()) {
+				currentPath = laters.pop();
+				serveStatic(path + "/" + currentPath, directory + "/" + currentPath);
+			}
+		}
+	}
+
+	public function serveFile(path:String, filePath:String) {
+		trace(path + ":" + filePath);
+		var fileContent : haxe.io.Bytes = null;
+		if(FileSystem.exists(filePath)) {
+			fileContent = File.getBytes(filePath);
+		}
+
+		routes.set(path, function(req, res) {
+			if(fileContent != null) {
+				res.setBytes(fileContent);
+			} else {
+				res.setBody("");
+			}
+			res.send();
+		});
 	}
 
 	public function listen(?host:String="0.0.0.0", ?ports:Array<Int> = null) {
